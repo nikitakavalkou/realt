@@ -109,7 +109,8 @@ def CheckAdStateKufar(href):
 
 def GetAdHrefsRealt(page_num):
     page_text = GetPageText('https://realt.by/rent/offices/?view='+str(page_num)+'#tabs')
-
+    print(page_text)
+'''
     if page_text.find('Ничего не найдено, поиск расширен') == -1:
         page = html.document_fromstring(page_text)
         AdList = page.find_class("list_ads__title")
@@ -123,3 +124,6 @@ def GetAdHrefsRealt(page_num):
         return ResultList
     else:
         return []
+'''
+
+GetAdHrefsRealt(0)
