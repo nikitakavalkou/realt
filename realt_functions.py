@@ -108,22 +108,72 @@ def CheckAdStateKufar(href):
 
 
 def GetAdHrefsRealt(page_num):
-    page_text = GetPageText('https://realt.by/rent/offices/?view='+str(page_num)+'#tabs')
-    print(page_text)
-'''
-    if page_text.find('Ничего не найдено, поиск расширен') == -1:
+    page_text = GetPageText('https://realt.by/rent/offices/?page='+str(page_num))
+
+
+    if page_text.find('Расширенный поиск в Минске и Минской области') == -1:
         page = html.document_fromstring(page_text)
-        AdList = page.find_class("list_ads__title")
+        AdList = page.find_class("bd-item")
         ResultList = []
+
+
         for Ad in AdList:
             try:
-                ResultList.append({'href': quote(Ad.get('href'), safe="%/:=&?~#+!$,;'@()*[]"),
-                                   'title': clearString(Ad.text_content())})
+                ResultList.append({'href': Ad.find_class('title')[0][0].get('href'),
+                                   'title': clearString(Ad.find_class('title')[0][0].text)})
             except:
                 continue
         return ResultList
     else:
         return []
-'''
 
-GetAdHrefsRealt(0)
+
+def GetAdFromLink(ad):
+    result = {}
+    page_text = GetPageText(ad['href'])
+    page = html.document_fromstring(page_text)
+
+    result['href']=ad['href']
+    result['title']=ad['title']
+    # Page views
+    view = page.find_class('views-control')
+    view = view[0].text_content()
+    view = int(view[view.find('за последние 7 дней – ') + len('за последние 7 дней – '):])
+    result['views'] = view
+
+    # Price
+    price = page.find_class('f14')[1].text_content().replace("\xa0", '')
+
+    if price.find("договорная")!=-1:
+        price = 0
+    elif (price.find('руб/кв.м')!=-1):
+        price=price.split(" ")
+        for p in price:
+            if p.find('руб/кв.м')!=-1:
+                price=p.replece('руб/кв.м','')
+                break
+
+    elif (price.find('руб')!=-1):
+        price=price
+
+
+    result['price'] = price
+
+    return (result)
+
+
+
+for i in range (1,100):
+    list=GetAdHrefsRealt(i)
+    for ad in list:
+        res=GetAdFromLink(ad)
+        print(res['price'],res['href'])
+
+
+
+
+
+
+
+
+
